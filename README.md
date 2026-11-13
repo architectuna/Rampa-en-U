@@ -23,7 +23,7 @@ Objeto paramétrico de rampa en U (dos tramos y descanso) para **Archicad 28**, 
 | ![](docs/img/ui_5_corte_texto.png) | |
 
 ## Instalación
-1. Descargá `Rampa en U 001.gsm` desde [Releases](../../releases).
+1. Descargá `Rampa.en.U.v0.6.gsm` desde [Releases](../../releases).
 2. En Archicad: *Archivo > Bibliotecas y Objetos > Administrador de bibliotecas > Agregar* (carpeta que contenga el archivo).
 3. Insertá el objeto con la herramienta Objeto.
 
