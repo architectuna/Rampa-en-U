@@ -1,0 +1,56 @@
+! --- Altura total: manual o vinculada a la planta superior
+alturaT = ZZYZX
+IF vincAltura = 2 THEN
+    rq = REQUEST ("Home_story", "", idxHome, nomHome)
+    rq = REQUEST ("Story_info", idxHome, nPl1, idx1, nom1, elev1, alt1)
+    rq = REQUEST ("Story_info", idxHome + plantaSup, nPl2, idx2, nom2, elev2, alt2)
+    hVinc = elev2 - elev1 - GLOB_ELEVATION + offsetSup
+    IF hVinc > 0.1 THEN alturaT = hVinc
+ENDIF
+
+hMed = alturaT / 2
+Ht   = alturaT
+Lt   = hMed / (pend / 100)      ! recorrido inclinado en planta (sin descansos)
+wA   = anchoTramo
+Atot = 2 * wA + ojo
+
+IF descIntermedio THEN
+    nDI = MIN(MAX(nDescInt, 1), 3)
+ELSE
+    nDI = 0
+ENDIF
+
+hs = hMed / (nDI + 1)           ! desnivel de cada rampa parcial
+Ls = Lt / (nDI + 1)             ! largo en planta de cada rampa parcial
+LF = Lt + nDI * dInt            ! largo en planta de cada tramo
+Btot = LF + dDescanso
+Linc = SQR(Lt * Lt + hMed * hMed)     ! longitud inclinada de cada tramo, sin descansos
+
+! Revestimiento y parapeto
+eRev = 0
+IF revestir AND espRev > 0.0005 THEN eRev = espRev
+pe = 0
+IF parapeto THEN pe = espPar
+altPar = altPar + eRev          ! altura de parapeto medida desde la cara superior terminada
+
+! Perfil de la CARA SUPERIOR TERMINADA del tramo 1: (uT, zT). Nivel 0.00 = esta cara en el arranque;
+! el núcleo y el revestimiento se extienden por debajo.
+DIM uT[8], zT[8]
+uT[1] = 0
+zT[1] = 0
+np = 1
+FOR i = 1 TO nDI + 1
+    np = np + 1
+    uT[np] = uT[np - 1] + Ls
+    zT[np] = zT[np - 1] + hs
+    IF i <= nDI THEN
+        np = np + 1
+        uT[np] = uT[np - 1] + dInt
+        zT[np] = zT[np - 1]
+    ENDIF
+NEXT i
+
+! Parámetros calculados / niveles del objeto
+IF vincAltura = 2 THEN PARAMETERS ZZYZX = alturaT
+PARAMETERS A = Atot, B = Btot, largoTramo = LF
+PARAMETERS ac_bottomlevel = -(esp + eRev), ac_toplevel = alturaT + altPar

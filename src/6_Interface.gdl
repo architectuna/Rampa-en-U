@@ -1,0 +1,116 @@
+UI_DIALOG "Rampa en U"
+UI_CURRENT_PAGE gs_ui_current_page
+
+UI_PAGE 1, -1, "Geometría y altura"
+IF gs_ui_current_page = 1 THEN GOSUB "pagina1"
+
+UI_PAGE 2, -1, "Núcleo y revestimiento"
+IF gs_ui_current_page = 2 THEN GOSUB "pagina2"
+
+UI_PAGE 3, -1, "Parapeto y descansos"
+IF gs_ui_current_page = 3 THEN GOSUB "pagina3"
+
+UI_PAGE 4, -1, "Representación en planta"
+IF gs_ui_current_page = 4 THEN GOSUB "pagina4"
+
+UI_PAGE 5, -1, "Marca de corte y texto"
+IF gs_ui_current_page = 5 THEN GOSUB "pagina5"
+
+END
+
+! ==================== PÁGINA 1: GEOMETRÍA ====================
+"pagina1":
+    y = 8
+    GOSUB "firma"
+    lbl = "Ancho de cada tramo"             : prm = "anchoTramo"   : GOSUB "campo"
+    lbl = "Separación entre tramos"         : prm = "ojo"          : GOSUB "campo"
+    lbl = "Profundidad descanso de giro"    : prm = "dDescanso"    : GOSUB "campo"
+    lbl = "Pendiente (%)"                   : prm = "pend"         : GOSUB "campo"
+    lbl = "Largo en planta del tramo"       : prm = "largoTramo"   : GOSUB "campo"
+    lbl = "ALTURA TOTAL DE LA RAMPA (PISO A PISO)" : GOSUB "titulo"
+    lbl = "Altura total de la rampa"        : prm = "ZZYZX"        : GOSUB "campo"
+    lbl = "Vinculación de la altura"        : prm = "vincAltura"   : GOSUB "campo"
+    lbl = "Pisos hacia arriba"              : prm = "plantaSup"    : GOSUB "campo"
+    lbl = "Desfase de nivel superior"       : prm = "offsetSup"    : GOSUB "campo"
+RETURN
+
+! ==================== PÁGINA 2: NÚCLEO Y REVESTIMIENTO ====================
+"pagina2":
+    y = 8
+    GOSUB "firma"
+    lbl = "NÚCLEO"                          : GOSUB "titulo"
+    lbl = "Espesor del núcleo"              : prm = "esp"          : GOSUB "campo"
+    lbl = "Material del núcleo"             : prm = "matRampa"     : GOSUB "campo"
+    lbl = "REVESTIMIENTO"                   : GOSUB "titulo"
+    lbl = "Con revestimiento"               : prm = "revestir"     : GOSUB "campo"
+    lbl = "Espesor del revestimiento"       : prm = "espRev"       : GOSUB "campo"
+    lbl = "Material del revestimiento"      : prm = "matRev"       : GOSUB "campo"
+RETURN
+
+! ==================== PÁGINA 3: PARAPETO Y ALTURA ====================
+"pagina3":
+    y = 8
+    GOSUB "firma"
+    lbl = "PARAPETO (AMBOS LADOS)"          : GOSUB "titulo"
+    lbl = "Con parapeto"                    : prm = "parapeto"     : GOSUB "campo"
+    lbl = "Altura del parapeto"             : prm = "altPar"       : GOSUB "campo"
+    lbl = "Espesor del parapeto"            : prm = "espPar"       : GOSUB "campo"
+    lbl = "Material del parapeto"           : prm = "matPar"       : GOSUB "campo"
+    lbl = "DESCANSOS INTERMEDIOS"           : GOSUB "titulo"
+    lbl = "Con descansos intermedios"       : prm = "descIntermedio" : GOSUB "campo"
+    lbl = "Cantidad por tramo"              : prm = "nDescInt"     : GOSUB "campo"
+    lbl = "Profundidad de cada uno"         : prm = "dInt"         : GOSUB "campo"
+RETURN
+
+! ==================== PÁGINA 4: PLANTA ====================
+"pagina4":
+    y = 8
+    GOSUB "firma"
+    lbl = "REPRESENTACIÓN"                  : GOSUB "titulo"
+    lbl = "Pluma de contorno"               : prm = "gs_cont_pen"  : GOSUB "campo"
+    lbl = "Trama de lo visible"             : prm = "gs_fill_type" : GOSUB "campo"
+    lbl = "Pluma de trama"                  : prm = "gs_fill_pen"  : GOSUB "campo"
+    lbl = "Pluma de fondo"                  : prm = "gs_back_pen"  : GOSUB "campo"
+    lbl = "Trama de lo oculto (selección)"  : prm = "fillSel"      : GOSUB "campo"
+    lbl = "Línea sobre el plano de corte"   : prm = "ltSobre"      : GOSUB "campo"
+    lbl = "LÍNEA DE PASO"                   : GOSUB "titulo"
+    lbl = "Mostrar línea de paso"           : prm = "mostrarRecorrido" : GOSUB "campo"
+RETURN
+
+! ==================== PÁGINA 5: MARCA DE CORTE Y TEXTO ====================
+"pagina5":
+    y = 8
+    GOSUB "firma"
+    lbl = "MARCA DE CORTE"                  : GOSUB "titulo"
+    lbl = "Mostrar marca de corte"          : prm = "mostrarRotura" : GOSUB "campo"
+    lbl = "Usar tipo de línea simbólico"    : prm = "rotSimbolo"   : GOSUB "campo"
+    lbl = "Tipo de línea simbólico"         : prm = "ltRotura"     : GOSUB "campo"
+    lbl = "Pluma de la marca de corte"      : prm = "penRotura"    : GOSUB "campo"
+    lbl = "TEXTO (PENDIENTE Y LONGITUD)"    : GOSUB "titulo"
+    lbl = "Mostrar texto"                   : prm = "mostrarPend"  : GOSUB "campo"
+    lbl = "Fuente"                          : prm = "fuenteTexto"  : GOSUB "campo"
+    lbl = "Tamaño (mm de papel)"            : prm = "tamTexto"     : GOSUB "campo"
+    lbl = "Pluma del texto"                 : prm = "penTexto"     : GOSUB "campo"
+    lbl = "Alinear con el símbolo"          : prm = "orientTexto"  : GOSUB "campo"
+RETURN
+
+! ---------- Subrutinas comunes ----------
+"firma":
+    UI_OUTFIELD "@arquitec.tuna", 8, y, 290, 17
+    UI_SEPARATOR 8, y + 19, 300, y + 19
+    y = y + 28
+RETURN
+
+"campo":
+    UI_OUTFIELD lbl, 8, y + 3, 185, 17
+    UI_INFIELD prm, 198, y, 104, 21
+    y = y + 23
+RETURN
+
+"titulo":
+    UI_STYLE 0, 1
+    UI_OUTFIELD lbl, 8, y, 290, 17
+    UI_STYLE 0, 0
+    UI_SEPARATOR 8, y + 19, 300, y + 19
+    y = y + 28
+RETURN

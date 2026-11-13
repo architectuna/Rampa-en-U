@@ -1,0 +1,50 @@
+VALUES{2} "vincAltura", 1, "Sin vinculación (altura manual)", 2, "Vinculada a planta superior"
+VALUES "plantaSup" RANGE [1,)
+VALUES "ZZYZX" RANGE (0,)
+VALUES "anchoTramo" RANGE (0,)
+VALUES "ojo" RANGE [0,)
+VALUES "dDescanso" RANGE [anchoTramo,)
+VALUES "pend" RANGE [1,40]
+VALUES "esp" RANGE (0,)
+VALUES "nDescInt" 1, 2, 3
+VALUES "dInt" RANGE (0,)
+
+IF vincAltura = 2 THEN
+    LOCK "ZZYZX"
+ELSE
+    LOCK "plantaSup", "offsetSup"
+ENDIF
+
+IF revestir THEN
+    VALUES "espRev" RANGE (0,)
+ELSE
+    LOCK "espRev", "matRev"
+ENDIF
+
+IF rotSimbolo = 0 THEN LOCK "ltRotura"
+IF parapeto = 0 THEN LOCK "espPar", "altPar", "matPar"
+IF mostrarPend = 0 THEN LOCK "fuenteTexto", "tamTexto", "penTexto", "orientTexto"
+VALUES "tamTexto" RANGE (0,)
+DIM fontNames[]
+DIM fontCorta[]
+nF = REQUEST ("FONTNAMES_LIST", "", fontNames)
+kF = 0
+FOR idxF = 1 TO VARDIM1 (fontNames)
+    IF STRSTR (fontNames[idxF], "@") <> 1 THEN
+        kF = kF + 1
+        fontCorta[kF] = fontNames[idxF]
+    ENDIF
+NEXT idxF
+IF kF > 0 THEN VALUES "fuenteTexto" fontCorta, CUSTOM
+
+IF descIntermedio THEN
+    nDI = MIN(MAX(nDescInt, 1), 3)
+ELSE
+    nDI = 0
+ENDIF
+
+lf_ = (ZZYZX / 2) / (pend / 100) + nDI * dInt
+PARAMETERS largoTramo = lf_
+PARAMETERS A = 2 * anchoTramo + ojo
+PARAMETERS B = lf_ + dDescanso
+LOCK "A", "B", "largoTramo"

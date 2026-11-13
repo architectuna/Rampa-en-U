@@ -1,0 +1,30 @@
+! --- Cantidades de la rampa (usa las variables del script Maestro: wA, Atot, LF, Linc, nDI, eRev, pe, altPar)
+
+! Núcleo: espesor vertical x largo en planta de cada tramo x ancho, más el descanso de giro
+volNucleo = esp * (2 * LF * wA + Atot * dDescanso)
+
+! Revestimiento: cara superior entre parapetos (tramos con su largo inclinado + descansos intermedios, y descanso de giro)
+areaRev = 0
+IF eRev > 0.0005 THEN
+    wF = wA - 2 * pe
+    IF wF < 0 THEN wF = 0
+    largoTr = Linc + nDI * dInt
+    areaRev = 2 * wF * largoTr
+    IF parapeto THEN
+        areaRev = areaRev + MAX(Atot - 2 * pe, 0) * MAX(dDescanso - 2 * pe, 0) + 2 * wF * pe
+    ELSE
+        areaRev = areaRev + Atot * dDescanso
+    ENDIF
+ENDIF
+
+! Parapetos: largo total x altura visible sobre la cara terminada (una cara)
+areaPar = 0
+IF parapeto THEN
+    hVis = altPar - eRev
+    largoPar = 4 * (Linc + nDI * dInt) + 2 * dDescanso + (Atot - 2 * espPar) + (ojo + 2 * espPar)
+    areaPar = largoPar * hVis
+ENDIF
+
+COMPONENT "Rampa - Núcleo (volumen)", volNucleo, "m3"
+IF eRev > 0.0005 THEN COMPONENT "Rampa - Revestimiento (superficie)", areaRev, "m2"
+IF parapeto THEN COMPONENT "Rampa - Parapeto (superficie vertical)", areaPar, "m2"

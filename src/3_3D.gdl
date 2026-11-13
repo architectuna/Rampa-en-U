@@ -1,0 +1,171 @@
+! --- Hotspots de edición (id únicos)
+idH = 1
+! Ancho de tramos: borde exterior izquierdo (base editable) y borde interior del tramo 1
+HOTSPOT 0, 0, 0, idH, anchoTramo, 1 + 256 : idH = idH + 1
+HOTSPOT -1, 0, 0, idH, anchoTramo, 3 : idH = idH + 1
+HOTSPOT wA, 0, 0, idH, anchoTramo, 2 : idH = idH + 1
+HOTSPOT 0, LF, hMed, idH, anchoTramo, 1 + 256 : idH = idH + 1
+HOTSPOT -1, LF, hMed, idH, anchoTramo, 3 : idH = idH + 1
+HOTSPOT wA, LF, hMed, idH, anchoTramo, 2 : idH = idH + 1
+! Ancho del ojo: borde interior del tramo 2
+HOTSPOT wA, 0, 0, idH, ojo, 1 + 128 : idH = idH + 1
+HOTSPOT wA - 1, 0, 0, idH, ojo, 3 : idH = idH + 1
+HOTSPOT wA + ojo, 0, 0, idH, ojo, 2 : idH = idH + 1
+HOTSPOT wA, LF, hMed, idH, ojo, 1 + 128 : idH = idH + 1
+HOTSPOT wA - 1, LF, hMed, idH, ojo, 3 : idH = idH + 1
+HOTSPOT wA + ojo, LF, hMed, idH, ojo, 2 : idH = idH + 1
+! Puntos de referencia
+HOTSPOT Atot, 0, 0
+HOTSPOT Atot, Btot, 0
+HOTSPOT 0, Btot, 0
+HOTSPOT 0, 0, Ht
+
+! ===================== NÚCLEO =====================
+! Nivel 0.00 = cara superior de la rampa (revestimiento si existe, si no el núcleo).
+! El cuerpo se extiende por debajo y los extremos son cortes verticales.
+SET BUILDING_MATERIAL matRampa
+
+! --- Tramo 1 (X = 0 .. wA), sube hacia +Y
+FOR i = 1 TO np
+    PUT uT[i], zT[i] - eRev, 15
+NEXT i
+FOR i = np TO 1 STEP -1
+    PUT uT[i], zT[i] - eRev - esp, 15
+NEXT i
+exW = wA
+GOSUB "extruir"
+
+! --- Tramo 2 (X = wA+ojo .. Atot), sube hacia -Y (perfil espejado y elevado hMed)
+FOR j = 1 TO np
+    PUT LF - uT[np + 1 - j], hMed + zT[np + 1 - j] - eRev, 15
+NEXT j
+FOR j = np TO 1 STEP -1
+    PUT LF - uT[np + 1 - j], hMed + zT[np + 1 - j] - eRev - esp, 15
+NEXT j
+exW = wA
+ADDX wA + ojo
+GOSUB "extruir"
+DEL 1
+
+! --- Descanso de giro (núcleo)
+ADD 0, LF, hMed - eRev - esp
+BLOCK Atot, dDescanso, esp
+DEL 1
+
+! ===================== PARAPETOS (sobre el núcleo) =====================
+IF parapeto THEN
+    SET BUILDING_MATERIAL matPar
+    exW = espPar
+
+    GOSUB "parTramo1"
+    GOSUB "extruir"
+    GOSUB "parTramo1"
+    ADDX wA - espPar
+    GOSUB "extruir"
+    DEL 1
+    GOSUB "parTramo2"
+    ADDX wA + ojo
+    GOSUB "extruir"
+    DEL 1
+    GOSUB "parTramo2"
+    ADDX Atot - espPar
+    GOSUB "extruir"
+    DEL 1
+
+    ! Descanso: laterales y fondo
+    ADD 0, LF, hMed - eRev
+    BLOCK espPar, dDescanso, altPar
+    DEL 1
+    ADD Atot - espPar, LF, hMed - eRev
+    BLOCK espPar, dDescanso, altPar
+    DEL 1
+    ADD espPar, Btot - espPar, hMed - eRev
+    BLOCK Atot - 2 * espPar, espPar, altPar
+    DEL 1
+
+    ! Cierre del ojo: cubre también las esquinas de los parapetos interiores
+    ADD wA - espPar, LF, hMed - eRev
+    BLOCK ojo + 2 * espPar, espPar, altPar
+    DEL 1
+ENDIF
+
+! ===================== REVESTIMIENTO (entre parapetos) =====================
+IF eRev > 0.0005 THEN
+    SET BUILDING_MATERIAL matRev
+    wF = wA - 2 * pe
+
+    IF wF > 0.001 THEN
+        ! Tramo 1
+        FOR i = 1 TO np
+            PUT uT[i], zT[i], 15
+        NEXT i
+        FOR i = np TO 1 STEP -1
+            PUT uT[i], zT[i] - eRev, 15
+        NEXT i
+        exW = wF
+        ADDX pe
+        GOSUB "extruir"
+        DEL 1
+
+        ! Tramo 2
+        FOR j = 1 TO np
+            PUT LF - uT[np + 1 - j], hMed + zT[np + 1 - j], 15
+        NEXT j
+        FOR j = np TO 1 STEP -1
+            PUT LF - uT[np + 1 - j], hMed + zT[np + 1 - j] - eRev, 15
+        NEXT j
+        exW = wF
+        ADDX wA + ojo + pe
+        GOSUB "extruir"
+        DEL 1
+    ENDIF
+
+    ! Descanso de giro
+    IF parapeto THEN
+        ADD pe, LF + pe, hMed - eRev
+        BLOCK Atot - 2 * pe, dDescanso - 2 * pe, eRev
+        DEL 1
+        IF wF > 0.001 THEN
+            ADD pe, LF, hMed - eRev
+            BLOCK wF, pe, eRev
+            DEL 1
+            ADD wA + ojo + pe, LF, hMed - eRev
+            BLOCK wF, pe, eRev
+            DEL 1
+        ENDIF
+    ELSE
+        ADD 0, LF, hMed - eRev
+        BLOCK Atot, dDescanso, eRev
+        DEL 1
+    ENDIF
+ENDIF
+
+END
+
+! ---------- Subrutinas 3D ----------
+! Extruye el perfil guardado con PUT (x = recorrido en planta Y, y = cota Z) a lo largo de +X
+"extruir":
+    ROTZ 90
+    ROTX 90
+    PRISM_ NSP/3, exW, GET(NSP)
+    DEL 2
+RETURN
+
+! Parapeto: desde la cara superior del núcleo hasta altPar por encima
+"parTramo1":
+    FOR i = 1 TO np
+        PUT uT[i], zT[i] - eRev, 15
+    NEXT i
+    FOR i = np TO 1 STEP -1
+        PUT uT[i], zT[i] - eRev + altPar, 15
+    NEXT i
+RETURN
+
+"parTramo2":
+    FOR j = 1 TO np
+        PUT LF - uT[np + 1 - j], hMed + zT[np + 1 - j] - eRev, 15
+    NEXT j
+    FOR j = np TO 1 STEP -1
+        PUT LF - uT[np + 1 - j], hMed + zT[np + 1 - j] - eRev + altPar, 15
+    NEXT j
+RETURN
